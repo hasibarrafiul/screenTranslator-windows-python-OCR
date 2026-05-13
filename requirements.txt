@@ -1,0 +1,11 @@
+# screenTranslator - Windows Overlay Application
+#
+# Uses native Windows OCR (WinRT) + Google Translate (deep-translator).
+# Windows 10/11 build 17763+ required for Windows.Media.Ocr.
+
+Pillow>=8.0.0
+deep-translator>=1.11.0
+winrt-Windows.Media.Ocr>=3.2.1
+winrt-Windows.Globalization>=3.2.1
+winrt-Windows.Graphics.Imaging>=3.2.1
+winrt-Windows.Storage.Streams>=3.2.1
