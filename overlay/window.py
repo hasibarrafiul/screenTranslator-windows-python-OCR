@@ -4,8 +4,8 @@ Slim coordinator that uses win32, ui, and pipeline modules.
 
 Three states:
   * Mini         – draggable circular button
-  * Expanded     – 30 % side panel with original + translation (double click)
-  * Fullscreen   – full-screen overlay showing only translation (single click)
+  * Settings     – side panel with language selectors (double click)
+  * Fullscreen   – full-screen overlay showing positioned translation (single click)
 """
 from __future__ import annotations
 
@@ -84,17 +84,13 @@ class OverlayWindow:
                 self._refresh_panel_text,
             )
 
-        refs = ui.draw_expanded_panel(
+        refs = ui.draw_settings_panel(
             self._canvas, pw, sh, on_left, self.config,
-            self._pipeline.original_text,
-            self._pipeline.translated_text,
             self._pipeline.source_lang,
             self._pipeline.target_lang,
             on_lang_change=_lc,
             on_minimise=self._show_mini,
         )
-        self._ow = refs["orig_widget"]
-        self._tw = refs["trans_widget"]
         self._fc = refs["from_combo"]
         self._tc = refs["to_combo"]
 

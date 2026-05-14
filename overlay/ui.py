@@ -26,7 +26,7 @@ def draw_mini_circle(canvas: tk.Canvas, size: int, cfg: OverlayConfig,
                        fill=cfg.accent_color, outline=cfg.accent_color, width=0)
     canvas.create_text(cx, cy, text="ST",
                        fill=cfg.fg_color,
-                       font=(cfg.font_family, int(size * 0.35), "bold"))
+                       font=(cfg.font_family, int(size * 0.28), "bold"))
     canvas.bind("<Button-1>", bind_handler)
     return cx, cy, r
 
@@ -41,19 +41,16 @@ def destroy_panel_widgets(from_combo, to_combo, orig_widget, trans_widget):
                 pass
 
 
-def draw_expanded_panel(canvas: tk.Canvas, w: int, h: int, on_left: bool,
+def draw_settings_panel(canvas: tk.Canvas, w: int, h: int, on_left: bool,
                         cfg: OverlayConfig,
-                        original_text: str,
-                        translated_text: str,
                         source_lang: str,
                         target_lang: str,
                         on_lang_change: Callable[[str, str], None],
                         on_minimise: Callable) -> dict:
     """
-    Draw the expanded panel on *canvas* (size w×h).
+    Draw the settings panel on *canvas* (size w×h) with language selectors only.
 
-    Returns a dict with widget references:
-        orig_widget, trans_widget, from_combo, to_combo
+    Returns a dict with widget references: from_combo, to_combo
     """
     bg = cfg.bg_color
     fg = cfg.fg_color
@@ -61,20 +58,17 @@ def draw_expanded_panel(canvas: tk.Canvas, w: int, h: int, on_left: bool,
     font = cfg.font_family
 
     header_h = 70
-    display_orig = original_text or "No text captured yet."
-    display_trans = translated_text or ""
 
     # Full background
     canvas.create_rectangle(0, 0, w, h, fill=bg, outline="")
-
-    # ── Header bar ──
     canvas.create_rectangle(0, 0, w, header_h, fill=bg, outline="")
 
+    # ── Title ──
     tx, anc = (12, "w") if on_left else (w - 12, "e")
-    canvas.create_text(tx, 14, text="screenTranslator",
-                       fill=fg, font=(font, 12, "bold"), anchor=anc)
+    canvas.create_text(tx, 14, text="Screen Translator by Fahim",
+                       fill=fg, font=(font, 11, "bold"), anchor=anc)
 
-    # Minimise button
+    # ── Minimise button ──
     br = 14
     bcx = w - 14 - 14 if on_left else 14 + 14
     canvas.create_oval(bcx - br, 28 - br, bcx + br, 28 + br,
@@ -82,7 +76,7 @@ def draw_expanded_panel(canvas: tk.Canvas, w: int, h: int, on_left: bool,
     canvas.create_line(bcx - 6, 28, bcx + 6, 28,
                        fill=fg, width=2, tags="minimise_icon")
 
-    # ── Language combos ──
+    # ── Language selectors ──
     cy, cw, ch = header_h - 30, 90, 22
     total = cw * 2 + 12 + 80
     rx = (w - total) // 2
@@ -117,35 +111,6 @@ def draw_expanded_panel(canvas: tk.Canvas, w: int, h: int, on_left: bool,
     fc.bind("<<ComboboxSelected>>", _lc)
     tc.bind("<<ComboboxSelected>>", _lc)
 
-    # ── Split view: Original / Translation ──
-    sy = header_h + (h - header_h) // 2
-    oh = sy - header_h - 24
-
-    canvas.create_text(w // 2, header_h + 4, text="[ Original ]",
-                       fill=accent, font=(font, 9, "bold"), anchor="n")
-    ow = tk.Text(canvas, wrap="word", font=(font, cfg.font_size),
-                 bg=bg, fg=fg, insertbackground=fg,
-                 highlightthickness=0, borderwidth=0, relief="flat",
-                 padx=8, pady=2)
-    ow.insert("1.0", display_orig)
-    ow.config(state="disabled")
-    canvas.create_window(w // 2, header_h + 18, window=ow, anchor="n",
-                         width=w - 4, height=oh - 6)
-
-    canvas.create_line(8, sy - 16, w - 8, sy - 16, fill=accent, width=1)
-
-    th_ = h - sy + 16
-    canvas.create_text(w // 2, sy - 10, text="[ Translation ]",
-                       fill=accent, font=(font, 9, "bold"), anchor="n")
-    tw = tk.Text(canvas, wrap="word", font=(font, cfg.font_size),
-                 bg=bg, fg=fg, insertbackground=fg,
-                 highlightthickness=0, borderwidth=0, relief="flat",
-                 padx=8, pady=2)
-    tw.insert("1.0", display_trans)
-    tw.config(state="disabled")
-    canvas.create_window(w // 2, sy, window=tw, anchor="n",
-                         width=w - 4, height=th_ - 10)
-
     # ── Minimise binding ──
     canvas.tag_bind("minimise_btn", "<Button-1>",
                     lambda e: on_minimise())
@@ -153,8 +118,6 @@ def draw_expanded_panel(canvas: tk.Canvas, w: int, h: int, on_left: bool,
                     lambda e: on_minimise())
 
     return {
-        "orig_widget": ow,
-        "trans_widget": tw,
         "from_combo": fc,
         "to_combo": tc,
         "from_var": from_var,
