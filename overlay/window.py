@@ -105,6 +105,10 @@ class OverlayWindow:
         assert self._root and self._canvas
         sw, sh = self._root.winfo_screenwidth(), self._root.winfo_screenheight()
 
+        # Destroy any lingering panel widgets (combos, text boxes) first
+        ui.destroy_panel_widgets(self._fc, self._tc, self._ow, self._tw)
+        self._fc = self._tc = self._ow = self._tw = None
+
         self._root.geometry(f"{sw}x{sh}+0+0")
         self._canvas.delete("all")
 
