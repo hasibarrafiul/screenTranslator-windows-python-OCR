@@ -1,0 +1,15 @@
+{
+  "mini_size": 50,
+  "mini_x": 10,
+  "mini_y": 10,
+  "mini_opacity": 0.9,
+  "expanded_width_pct": 0.3,
+  "expanded_opacity": 0.92,
+  "font_family": "Segoe UI",
+  "font_size": 13,
+  "bg_color": "#1e1e1e",
+  "fg_color": "#ffffff",
+  "accent_color": "#0078d4",
+  "save_translations": true,
+  "save_path": "C:/Users/fahad/OneDrive/Desktop/Projects/screenTranslator/test.txt"
+}

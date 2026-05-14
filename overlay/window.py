@@ -51,6 +51,9 @@ class OverlayWindow:
         self._tw = None  # trans_widget
         self._fc = None  # from_combo
         self._tc = None  # to_combo
+        self._sc = None  # save_checkbutton
+        self._pe = None  # path_entry
+        self._pb = None  # path_browse_btn
 
     # ── State transitions ─────────────────────────────────────────────
 
@@ -84,15 +87,24 @@ class OverlayWindow:
                 self._refresh_panel_text,
             )
 
+        def _cc(key: str, value) -> None:
+            """Persist config changes from the settings panel."""
+            setattr(self.config, key, value)
+            self.config.save()
+
         refs = ui.draw_settings_panel(
             self._canvas, pw, sh, on_left, self.config,
             self._pipeline.source_lang,
             self._pipeline.target_lang,
             on_lang_change=_lc,
             on_minimise=self._show_mini,
+            on_config_change=_cc,
         )
         self._fc = refs["from_combo"]
         self._tc = refs["to_combo"]
+        self._sc = refs["save_check"]
+        self._pe = refs["path_entry"]
+        self._pb = refs["browse_btn"]
 
         win32.apply_opacity(self._root, self.config.expanded_opacity)
 
@@ -101,9 +113,11 @@ class OverlayWindow:
         assert self._root and self._canvas
         sw, sh = self._root.winfo_screenwidth(), self._root.winfo_screenheight()
 
-        # Destroy any lingering panel widgets (combos, text boxes) first
-        ui.destroy_panel_widgets(self._fc, self._tc, self._ow, self._tw)
+        # Destroy any lingering panel widgets (combos, check, entry, buttons) first
+        ui.destroy_panel_widgets(self._fc, self._tc, self._ow, self._tw,
+                                 self._sc, self._pe, self._pb)
         self._fc = self._tc = self._ow = self._tw = None
+        self._sc = self._pe = self._pb = None
 
         self._root.geometry(f"{sw}x{sh}+0+0")
         self._canvas.delete("all")
@@ -171,6 +185,7 @@ class OverlayWindow:
         self._pipeline.capture_and_process(
             self._root,
             on_done=self._show_fullscreen_translation,
+            save_cfg=(self.config.save_translations, self.config.save_path),
         )
 
     def _on_double_click(self) -> None:

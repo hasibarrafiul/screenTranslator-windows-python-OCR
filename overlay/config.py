@@ -32,6 +32,10 @@ class OverlayConfig:
     fg_color: str = "#ffffff"
     accent_color: str = "#0078d4"
 
+    # Save translations
+    save_translations: bool = False
+    save_path: str = ""
+
     @classmethod
     def load(cls) -> "OverlayConfig":
         """Load config from disk, or return defaults."""

@@ -31,9 +31,9 @@ def draw_mini_circle(canvas: tk.Canvas, size: int, cfg: OverlayConfig,
     return cx, cy, r
 
 
-def destroy_panel_widgets(from_combo, to_combo, orig_widget, trans_widget):
+def destroy_panel_widgets(*widgets):
     """Destroy all ttk/Text widgets from a previous panel draw."""
-    for wgt in (from_combo, to_combo, orig_widget, trans_widget):
+    for wgt in widgets:
         if wgt is not None:
             try:
                 wgt.destroy()
@@ -46,11 +46,12 @@ def draw_settings_panel(canvas: tk.Canvas, w: int, h: int, on_left: bool,
                         source_lang: str,
                         target_lang: str,
                         on_lang_change: Callable[[str, str], None],
-                        on_minimise: Callable) -> dict:
+                        on_minimise: Callable,
+                        on_config_change: Callable[[str, str], None] = None) -> dict:
     """
-    Draw the settings panel on *canvas* (size w×h) with language selectors only.
+    Draw the settings panel with language selectors and save options.
 
-    Returns a dict with widget references: from_combo, to_combo
+    Returns a dict with widget references: from_combo, to_combo, save_var, path_var
     """
     bg = cfg.bg_color
     fg = cfg.fg_color
@@ -111,6 +112,54 @@ def draw_settings_panel(canvas: tk.Canvas, w: int, h: int, on_left: bool,
     fc.bind("<<ComboboxSelected>>", _lc)
     tc.bind("<<ComboboxSelected>>", _lc)
 
+    # ── Save translations section ──
+    save_y = header_h + 20
+    row_h = 30
+
+    # Checkbox
+    save_var = tk.BooleanVar(value=cfg.save_translations)
+    cb = ttk.Checkbutton(canvas, text="Save translations", variable=save_var)
+    cb.place(x=12, y=save_y)
+
+    # Path field + Browse button
+    path_var = tk.StringVar(value=cfg.save_path)
+    path_entry = ttk.Entry(canvas, textvariable=path_var)
+    path_entry.place(x=12, y=save_y + 28, width=w - 80, height=24)
+
+    browse_btn = ttk.Button(canvas, text="Browse...",
+                            command=lambda: _browse(path_var))
+    browse_btn.place(x=w - 64, y=save_y + 28, width=56, height=24)
+
+    # Info label
+    canvas.create_text(12, save_y + 60,
+                       text="Each capture appends unique lines to the file.",
+                       fill=fg, font=(font, 8), anchor="w")
+
+    def _browse(var: tk.StringVar) -> None:
+        """Open a file-save dialog and set the path."""
+        import tkinter.filedialog as fd
+        p = fd.asksaveasfilename(
+            defaultextension=".txt",
+            filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
+            title="Select save file for translations",
+        )
+        if p:
+            var.set(p)
+            if on_config_change:
+                on_config_change("save_path", p)
+
+    # Auto-save config when checkbox toggles
+    def _on_save_toggle():
+        if on_config_change:
+            on_config_change("save_translations", save_var.get())
+    cb.configure(command=_on_save_toggle)
+
+    # Auto-save config when path changes
+    def _on_path_change(*a):
+        if on_config_change:
+            on_config_change("save_path", path_var.get())
+    path_var.trace_add("write", _on_path_change)
+
     # ── Minimise binding ──
     canvas.tag_bind("minimise_btn", "<Button-1>",
                     lambda e: on_minimise())
@@ -122,6 +171,11 @@ def draw_settings_panel(canvas: tk.Canvas, w: int, h: int, on_left: bool,
         "to_combo": tc,
         "from_var": from_var,
         "to_var": to_var,
+        "save_var": save_var,
+        "path_var": path_var,
+        "save_check": cb,
+        "path_entry": path_entry,
+        "browse_btn": browse_btn,
     }
 
 
