@@ -1,6 +1,11 @@
 """
 Overlay window orchestrator.
 Slim coordinator that uses win32, ui, and pipeline modules.
+
+Three states:
+  * Mini         – draggable circular button
+  * Expanded     – 30 % side panel with original + translation (double click)
+  * Fullscreen   – full-screen overlay showing only translation (single click)
 """
 from __future__ import annotations
 
@@ -41,7 +46,7 @@ class OverlayWindow:
         # Click timer
         self._click_timer_id: Optional[str] = None
 
-        # Panel widget refs
+        # Expanded panel widget refs
         self._ow = None  # orig_widget
         self._tw = None  # trans_widget
         self._fc = None  # from_combo
@@ -59,6 +64,7 @@ class OverlayWindow:
         win32.apply_opacity(self._root, self.config.mini_opacity)
 
     def _show_expanded(self) -> None:
+        """30 % side panel with original + translation and language selectors."""
         assert self._root and self._canvas
         sw, sh = self._root.winfo_screenwidth(), self._root.winfo_screenheight()
         pw = int(sw * self.config.expanded_width_pct)
@@ -68,7 +74,6 @@ class OverlayWindow:
 
         self._root.geometry(f"{pw}x{sh}+{x}+0")
 
-        # Destroy old panel widgets before redrawing
         ui.destroy_panel_widgets(self._fc, self._tc, self._ow, self._tw)
         self._canvas.delete("all")
 
@@ -92,6 +97,22 @@ class OverlayWindow:
         self._tw = refs["trans_widget"]
         self._fc = refs["from_combo"]
         self._tc = refs["to_combo"]
+
+        win32.apply_opacity(self._root, self.config.expanded_opacity)
+
+    def _show_fullscreen_translation(self) -> None:
+        """Full-screen overlay showing only the translated text."""
+        assert self._root and self._canvas
+        sw, sh = self._root.winfo_screenwidth(), self._root.winfo_screenheight()
+
+        self._root.geometry(f"{sw}x{sh}+0+0")
+        self._canvas.delete("all")
+
+        ui.draw_fullscreen_overlay(
+            self._canvas, sw, sh, self.config,
+            self._pipeline.lines,
+            on_dismiss=self._show_mini,
+        )
 
         win32.apply_opacity(self._root, self.config.expanded_opacity)
 
@@ -144,10 +165,16 @@ class OverlayWindow:
             self._click_timer_id = self._root.after(DOUBLE_CLICK_INTERVAL, self._on_single_click)
 
     def _on_single_click(self) -> None:
+        """Single click: capture + OCR + translate, then show full-screen translation."""
         self._click_timer_id = None
-        self._pipeline.capture_and_process(self._root, self._refresh_panel_text)
+        # Capture + translate then show fullscreen overlay
+        self._pipeline.capture_and_process(
+            self._root,
+            on_done=self._show_fullscreen_translation,
+        )
 
     def _on_double_click(self) -> None:
+        """Double click: open the expanded side panel."""
         self._show_expanded()
 
     # ── Public API ────────────────────────────────────────────────────
