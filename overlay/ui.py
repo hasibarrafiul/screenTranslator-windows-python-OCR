@@ -47,7 +47,8 @@ def draw_settings_panel(canvas: tk.Canvas, w: int, h: int, on_left: bool,
                         target_lang: str,
                         on_lang_change: Callable[[str, str], None],
                         on_minimise: Callable,
-                        on_config_change: Callable[[str, str], None] = None) -> dict:
+                        on_config_change: Callable[[str, str], None] = None,
+                        on_exit: Callable = None) -> dict:
     """
     Draw the settings panel with language selectors and save options.
 
@@ -165,6 +166,11 @@ def draw_settings_panel(canvas: tk.Canvas, w: int, h: int, on_left: bool,
                     lambda e: on_minimise())
     canvas.tag_bind("minimise_icon", "<Button-1>",
                     lambda e: on_minimise())
+    # ── Exit button ──
+    exit_btn_y = save_y + 100
+    exit_btn = ttk.Button(canvas, text="Exit Application",
+                          command=on_exit if on_exit else lambda: None)
+    exit_btn.place(x=12, y=exit_btn_y, width=w - 24, height=28)
 
     return {
         "from_combo": fc,
@@ -176,6 +182,7 @@ def draw_settings_panel(canvas: tk.Canvas, w: int, h: int, on_left: bool,
         "save_check": cb,
         "path_entry": path_entry,
         "browse_btn": browse_btn,
+        "exit_btn": exit_btn,
     }
 
 

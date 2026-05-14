@@ -99,12 +99,14 @@ class OverlayWindow:
             on_lang_change=_lc,
             on_minimise=self._show_mini,
             on_config_change=_cc,
+            on_exit=self.stop,
         )
         self._fc = refs["from_combo"]
         self._tc = refs["to_combo"]
         self._sc = refs["save_check"]
         self._pe = refs["path_entry"]
         self._pb = refs["browse_btn"]
+        self._eb = refs["exit_btn"]
 
         win32.apply_opacity(self._root, self.config.expanded_opacity)
 
