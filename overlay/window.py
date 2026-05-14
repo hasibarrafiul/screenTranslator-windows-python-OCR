@@ -54,6 +54,7 @@ class OverlayWindow:
         self._sc = None  # save_checkbutton
         self._pe = None  # path_entry
         self._pb = None  # path_browse_btn
+        self._eb = None  # exit_btn
 
     # ── State transitions ─────────────────────────────────────────────
 
@@ -117,9 +118,9 @@ class OverlayWindow:
 
         # Destroy any lingering panel widgets (combos, check, entry, buttons) first
         ui.destroy_panel_widgets(self._fc, self._tc, self._ow, self._tw,
-                                 self._sc, self._pe, self._pb)
+                                 self._sc, self._pe, self._pb, self._eb)
         self._fc = self._tc = self._ow = self._tw = None
-        self._sc = self._pe = self._pb = None
+        self._sc = self._pe = self._pb = self._eb = None
 
         self._root.geometry(f"{sw}x{sh}+0+0")
         self._canvas.delete("all")
