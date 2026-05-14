@@ -10,7 +10,7 @@ translates the text using **Windows native WinRT OCR** + **Google Translate**.
 2. **Single click** (no drag) → captures the screen, runs OCR with the
    **source language**, translates to the **target language**, and stores
    the result silently.
-3. **Double click** → opens the expanded panel showing the **original text**
+3. **Double click** → opens the setting panel with languege selection, save translation to text and exit button **original text**
    (top) and its **translation** (bottom).
 4. **Expanded panel** – covers ≈30 % of screen width and full height.
    Opens on the **same side** the button sits (left or right based on
