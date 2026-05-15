@@ -218,7 +218,7 @@ def draw_fullscreen_overlay(canvas: tk.Canvas, w: int, h: int,
         if not line.text.strip():
             continue
         # Scale font size to box height (roughly 80% of the OCR text height)
-        font_size = max(8, int(line.height * 0.75))
+        font_size = min(max(8, int(line.height * 0.75)), 30)
         canvas.create_text(
             line.x, line.y,
             text=line.text,
